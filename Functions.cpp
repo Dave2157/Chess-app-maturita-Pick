@@ -822,7 +822,7 @@ std::vector<Move> findLegalMovesForAPiece(const Board& board, char piece, int pi
 			potentialBoard.layout[move.targetY][move.targetX] = potentialBoard.layout[move.startY][move.startX];
 			potentialBoard.layout[move.startY][move.startX] = ' ';
 
-			potentialBoard.whiteToMove = !potentialBoard.whiteToMove;
+			//potentialBoard.whiteToMove = !potentialBoard.whiteToMove;
 
 
 
