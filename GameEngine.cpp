@@ -4,7 +4,8 @@
 
 bool GameEngine::OnUserCreate()
 {
-	activeBoard.setBoardFEN("7K/1r6/r7/8/8/8/8/7k w KQkq - 0 0");
+	//activeBoard.setBoardFEN("7K/1r6/r7/8/8/8/8/7k w KQkq - 0 0");
+	activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
 	activeBoard.currentTurnInformationPackage = { {-1, -1}, {-1, -1, -1, -1} };
 
 	activeBoard.whitePlayer = new Player;
@@ -102,20 +103,10 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 
 
 
-		std::vector<Move> allLegalMoves;
-		std::vector <pair<int, int>> piecesLocations = findAllPieces(activeBoard, activeBoard.whiteToMove);
-
-		for (pair<int, int> pieceLoc : piecesLocations)
-		{
-			char pieceType = activeBoard.layout[pieceLoc.second][pieceLoc.first];
-			auto legalMovesForThisPiece = findLegalMovesForAPiece(activeBoard, pieceType, pieceLoc.first, pieceLoc.second);
-			allLegalMoves.insert(allLegalMoves.end(), legalMovesForThisPiece.begin(), legalMovesForThisPiece.end());
-		}
-
-		if (!allLegalMoves.size())
-		{
-			activeBoard.checkmate = activeBoard.whiteToMove ? 'w' : 'b';
-		}
+		if (checkForCheckmate(activeBoard, true))
+			activeBoard.checkmate = 'w';
+		else if (checkForCheckmate(activeBoard, false))
+			activeBoard.checkmate = 'b';
 	}
 
 	

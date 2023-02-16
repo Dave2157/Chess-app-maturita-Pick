@@ -806,25 +806,8 @@ std::vector<Move> findLegalMovesForAPiece(const Board& board, char piece, int pi
 		{
 			Board potentialBoard(board);
 
-			if (move.pawnTwoTileMove)												//refactor
-			{
-				int enPassentRank = potentialBoard.whiteToMove ? 5 : 2;
-				potentialBoard.enPassentSquare = std::make_pair(move.targetX, enPassentRank);
-			}
-			else
-				potentialBoard.enPassentSquare = std::make_pair(-1, -1);
-
-			if (move.enPassent)
-			{
-				potentialBoard.layout[move.targetY + (potentialBoard.whiteToMove ? 1 : -1)][move.targetX] = ' ';
-			}
-
-			potentialBoard.layout[move.targetY][move.targetX] = potentialBoard.layout[move.startY][move.startX];
-			potentialBoard.layout[move.startY][move.startX] = ' ';
-
-			//potentialBoard.whiteToMove = !potentialBoard.whiteToMove;
-
-
+			makeMove(potentialBoard, move);
+			potentialBoard.whiteToMove = !potentialBoard.whiteToMove;
 
 			int kingX = 0;
 			int kingY = 0;
@@ -943,4 +926,40 @@ std::vector<pair<int, int>> findPiecesOfAGivenType(const Board& board, char piec
 			if (board.layout[y][x] == piece)
 				toBeReturned.push_back(std::make_pair(x, y));
 	return toBeReturned;
+}
+
+bool checkForCheckmate(const Board& board, bool white)
+{
+	int kingX = 0;
+	int kingY = 0;
+	char kingChar = white ? 'K' : 'k';
+
+
+	for (kingX = 0; kingX < 8; kingX++)
+		for (kingY = 0; kingY < 8; kingY++)
+			if (board.layout[kingY][kingX] == kingChar)
+				goto checkForCheckmateLabel;
+checkForCheckmateLabel:
+
+
+	if (isSquareUnderAttack(board, kingX, kingY, !white))
+	{
+		auto allPieces = findAllPieces(board, white);
+		std::vector<Move> allLegalMoves;
+
+		for (pair<int, int> piece : allPieces)
+		{
+			char pieceType = board.layout[piece.second][piece.first];
+
+			Board tempBoard(board);
+			tempBoard.whiteToMove = white;
+
+			auto legalMovesForThisPiece = findLegalMovesForAPiece(tempBoard, pieceType, piece.first, piece.second);
+
+			allLegalMoves.insert(allLegalMoves.end(), legalMovesForThisPiece.begin(), legalMovesForThisPiece.end());
+		}
+		if (!allLegalMoves.size())
+			return true;
+	}
+	return false;
 }

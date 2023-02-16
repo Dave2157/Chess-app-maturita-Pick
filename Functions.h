@@ -7,3 +7,4 @@ std::vector<Move> findLegalMovesForAPiece(const Board& board, char piece, int pi
 std::vector<pair<int, int>> findAllPieces(const Board& board, bool white);
 void makeMove(Board& board, Move& move);
 std::vector<pair<int, int>> findPiecesOfAGivenType(const Board& board, char piece);
+bool checkForCheckmate(const Board& board, bool white);

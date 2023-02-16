@@ -39,10 +39,16 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 	}
 	else
 	{
+
 		for (Move move : allLegalMoves)
 		{
 			Board newBoard(board);
 			makeMove(newBoard, move);
+
+			if (checkForCheckmate(newBoard, true))
+				return { move, -INT_MAX };
+			if (checkForCheckmate(newBoard, false))
+				return { move, INT_MAX };
 
 			int score = Minimax(newBoard, 0, MINIMAX_BRANCHES, !whitesTurn).score;
 			movesWithEvaluations.push_back({ move, score });
@@ -136,12 +142,12 @@ int evaluatePosition(const Board& board)
 
 	int pawnStructureScore = 0;
 	pawnStructureScore += evaluatePawnStucture(board, true);
-	pawnStructureScore += evaluatePawnStucture(board, false);
+	pawnStructureScore -= evaluatePawnStucture(board, false);
 	score += pawnStructureScore;
 
 	int oneSideHasAWeakColorScore = 0;
 	oneSideHasAWeakColorScore += evaluateWeaknessesOnColoredSquares(board, true);
-	oneSideHasAWeakColorScore += evaluateWeaknessesOnColoredSquares(board, false);
+	oneSideHasAWeakColorScore -= evaluateWeaknessesOnColoredSquares(board, false);
 	score += oneSideHasAWeakColorScore;
 
 	return score;
@@ -384,14 +390,19 @@ int evaluateKing(const Board& board, int x, int y, bool isWhite)
 	{
 		auto allPieces = findAllPieces(board, isWhite);
 		std::vector<Move> allLegalMoves;
+		Board tempBoard(board);
+		tempBoard.whiteToMove = !tempBoard.whiteToMove;
+
 		for (pair<int, int> piece : allPieces)
 		{
 			char pieceType = board.layout[piece.second][piece.first];
-			auto legalMovesForThisPiece = findLegalMovesForAPiece(board, pieceType, piece.first, piece.second);
+			
+			auto legalMovesForThisPiece = findLegalMovesForAPiece(tempBoard, pieceType, piece.first, piece.second);
+
 			allLegalMoves.insert(allLegalMoves.end(), legalMovesForThisPiece.begin(), legalMovesForThisPiece.end());
 		}
 		if (!allLegalMoves.size())
-			score -= INT_MAX;
+			score -= 1000000;
 	}
 
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "BoardAndUtils.h"
-const int MINIMAX_BRANCHES = 1;
-const int MINIMAX_DEPTH = 1;
+const int MINIMAX_BRANCHES = 3;
+const int MINIMAX_DEPTH = 3;
 struct MinimaxPackage
 {
 	Move move;
