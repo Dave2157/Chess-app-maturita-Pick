@@ -963,3 +963,51 @@ checkForCheckmateLabel:
 	}
 	return false;
 }
+
+bool checkForStalemate(const Board& board, bool whiteToMove)
+{
+	bool stalemate = false;
+
+	bool majorPieceOrAPawnIsPresent = false;
+	int blackMinorPiecesCount = 0;
+	int whiteMinorPiecesCount = 0;
+
+	for (int x = 0; x < 8; x++)
+		for (int y = 0; y < 8; y++)
+		{
+			char pieceType = board.layout[y][x];
+			if (pieceType == 'Q' || pieceType == 'q' || pieceType == 'R' || pieceType == 'r' || pieceType == 'P' || pieceType == 'p')
+				majorPieceOrAPawnIsPresent = true;
+			if (pieceType == 'B' || pieceType == 'N')
+				whiteMinorPiecesCount++;
+			if (pieceType == 'b' || pieceType == 'n')
+				blackMinorPiecesCount++;
+		}
+
+
+	auto allPieces = findAllPieces(board, whiteToMove);
+	std::vector<Move> allLegalMoves;
+
+	for (pair<int, int> piece : allPieces)
+	{
+		char pieceType = board.layout[piece.second][piece.first];
+
+		Board tempBoard(board);
+		tempBoard.whiteToMove = whiteToMove;
+
+		auto legalMovesForThisPiece = findLegalMovesForAPiece(tempBoard, pieceType, piece.first, piece.second);
+
+		allLegalMoves.insert(allLegalMoves.end(), legalMovesForThisPiece.begin(), legalMovesForThisPiece.end());
+	}
+
+	stalemate = !allLegalMoves.size();
+
+	if (blackMinorPiecesCount <= 2 && whiteMinorPiecesCount <= 2 && !majorPieceOrAPawnIsPresent)
+		return true;
+	if (board.fiftyMoveRuleCounter == 100)
+		return true;
+	if (stalemate)
+		return true;
+
+	return false;
+}

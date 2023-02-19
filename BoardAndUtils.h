@@ -37,6 +37,7 @@ struct Board
 	int fullMoves;
 	char checkmate;
 
+
 	Controller* whitePlayer;
 	Controller* blackPlayer;
 

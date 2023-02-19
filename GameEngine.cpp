@@ -5,16 +5,21 @@
 bool GameEngine::OnUserCreate()
 {
 	//activeBoard.setBoardFEN("7K/1r6/r7/8/8/8/8/7k w KQkq - 0 0");
-	activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
+	///activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
+	//activeBoard.setBoardFEN("7k/8/1P6/6q1/8/8/PPP5/1KR5 w KQkq - 0 0");
+	activeBoard.setBoardFEN("k8/8/2Q5/8/8/8/8/K7 b KQkq - 0 0");
 	activeBoard.currentTurnInformationPackage = { {-1, -1}, {-1, -1, -1, -1} };
 
 	activeBoard.whitePlayer = new Player;
-	activeBoard.blackPlayer = new Computer;
+	activeBoard.blackPlayer = new Player;
 
 	return true;
 }
 bool GameEngine::OnUserUpdate(float elapsedTime)
 {
+	if (checkForStalemate(activeBoard, activeBoard.whiteToMove))
+		activeBoard.checkmate = 's';
+
 	if (activeBoard.checkmate)
 	{
 		
@@ -26,9 +31,16 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 		int selectedPieceX = activeBoard.currentTurnInformationPackage.selectedPiece.first;
 		int selectedPieceY = activeBoard.currentTurnInformationPackage.selectedPiece.second;
 
-		if (activeBoard.currentTurnInformationPackage.playedMove.targetX != -1)
+		Move playedMove = activeBoard.currentTurnInformationPackage.playedMove;
+
+		if (playedMove.targetX != -1)
 		{
-			makeMove(activeBoard, activeBoard.currentTurnInformationPackage.playedMove);
+			if (!(activeBoard.layout[playedMove.targetY][playedMove.targetX] != ' ' || activeBoard.layout[playedMove.startY][playedMove.startX] == 'P' || activeBoard.layout[playedMove.startY][playedMove.startX] == 'p'))
+				activeBoard.fiftyMoveRuleCounter++;
+			else
+				activeBoard.fiftyMoveRuleCounter = 0;
+
+			makeMove(activeBoard, playedMove);
 		}
 
 		drawBoard();
@@ -97,6 +109,10 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 		else if (activeBoard.currentTurnInformationPackage.playedMove.targetX != -1)
 		{
 			activeBoard.currentTurnInformationPackage.playedMove = { -1, -1, -1, -1, false, 0, 0, 0 };
+
+			if (!activeBoard.whiteToMove)
+				activeBoard.fullMoves++;
+
 			activeBoard.whiteToMove = !activeBoard.whiteToMove;
 		}
 
@@ -108,9 +124,6 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 		else if (checkForCheckmate(activeBoard, false))
 			activeBoard.checkmate = 'b';
 	}
-
-	
-
 
 	return true;
 }

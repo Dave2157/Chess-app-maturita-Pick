@@ -14,7 +14,43 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 	{
 		char pieceType = board.layout[pieceLoc.second][pieceLoc.first];
 		auto legalMovesForThisPiece = findLegalMovesForAPiece(board, pieceType, pieceLoc.first, pieceLoc.second);
+
+		for (auto move : legalMovesForThisPiece)
+		{
+			if (!move.promotion)
+				continue;
+			if (move.promotion == 'w')
+			{
+				move.promotion = 'Q';
+				allLegalMoves.push_back(move);
+				move.promotion = 'R';
+				allLegalMoves.push_back(move);
+				move.promotion = 'N';
+				allLegalMoves.push_back(move);
+				move.promotion = 'B';
+				allLegalMoves.push_back(move);
+			}
+			else
+			{
+				move.promotion = 'q';
+				allLegalMoves.push_back(move);
+				move.promotion = 'r';
+				allLegalMoves.push_back(move);
+				move.promotion = 'n';
+				allLegalMoves.push_back(move);
+				move.promotion = 'b';
+				allLegalMoves.push_back(move);
+			}
+		}
+
 		allLegalMoves.insert(allLegalMoves.end(), legalMovesForThisPiece.begin(), legalMovesForThisPiece.end());
+
+		auto garbageStart = std::remove_if(allLegalMoves.begin(), allLegalMoves.end(),
+			[](Move& m)
+			{
+				return m.promotion == 'w' || m.promotion == 's';
+			});
+		allLegalMoves.erase(garbageStart, allLegalMoves.end());
 	}
 
 	vector<MinimaxPackage> movesWithEvaluations;
@@ -24,10 +60,16 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 		for (Move move : allLegalMoves)
 		{
 			Board newBoard(board);
+			char promotionState = move.promotion;
 			makeMove(newBoard, move);
 
-			int score = evaluatePosition(newBoard);
+			int score;
+
+			score = evaluatePosition(newBoard);
+
+			move.promotion = promotionState;
 			movesWithEvaluations.push_back({ move, score });
+			
 		}
 		std::sort(movesWithEvaluations.begin(), movesWithEvaluations.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)
 			{
@@ -43,15 +85,24 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 		for (Move move : allLegalMoves)
 		{
 			Board newBoard(board);
+			char promotionState = move.promotion;
 			makeMove(newBoard, move);
 
 			if (checkForCheckmate(newBoard, true))
 				return { move, -INT_MAX };
 			if (checkForCheckmate(newBoard, false))
 				return { move, INT_MAX };
+			if (checkForStalemate(newBoard, !whitesTurn))
+				return { move, 0 };
 
-			int score = Minimax(newBoard, 0, MINIMAX_BRANCHES, !whitesTurn).score;
+			int score;
+
+			score = Minimax(newBoard, 0, MINIMAX_BRANCHES, !whitesTurn).score;
+
+			move.promotion = promotionState;
 			movesWithEvaluations.push_back({ move, score });
+
+			
 		}
 		std::sort(movesWithEvaluations.begin(), movesWithEvaluations.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)
 			{
@@ -70,9 +121,13 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 	for (int i = 0; i < numberOfBranches && i < movesWithEvaluations.size(); i++)
 	{
 		Board newBoard(board);
+		char promotionState = movesToExamineFurther[i].move.promotion;
 		makeMove(newBoard, movesToExamineFurther[i].move);
 		
+		movesToExamineFurther[i].move.promotion = promotionState;
+
 		logAMoveWtihEvaluationsOfBothPositionsIntoAFile(board, movesToExamineFurther[i].move, "Logs.txt");						//=============================================================================== LOG
+		movesToExamineFurther[i].move.promotion = promotionState;
 
 		movesToExamineFurther[i].score = Minimax(newBoard, depthInHalfTurns - 1, numberOfBranches, !whitesTurn).score;
 	}
@@ -376,7 +431,7 @@ int evaluateKing(const Board& board, int x, int y, bool isWhite)
 	if (numberOfEnemyMajorPieces > 3)
 	{
 		int closedKingScore = 0;
-		std::vector<pair<int, int>> offsets = isWhite ? std::vector<pair<int, int>>({ { 0, 1 }, { -1, 1 }, { 1, 1 } }) : std::vector<pair<int, int>>({ {-1, -1}, { 0, -1 }, { 1, -1 } });
+		std::vector<pair<int, int>> offsets = !isWhite ? std::vector<pair<int, int>>({ { 0, 1 }, { -1, 1 }, { 1, 1 } }) : std::vector<pair<int, int>>({ {-1, -1}, { 0, -1 }, { 1, -1 } });
 		auto caseFunction = isWhite ? isupper : islower;
 		for (auto offset : offsets)
 		{
