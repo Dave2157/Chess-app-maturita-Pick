@@ -5,27 +5,31 @@
 bool GameEngine::OnUserCreate()
 {
 	//activeBoard.setBoardFEN("7K/1r6/r7/8/8/8/8/7k w KQkq - 0 0");
-	///activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
+	//activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
 	//activeBoard.setBoardFEN("7k/8/1P6/6q1/8/8/PPP5/1KR5 w KQkq - 0 0");
-	activeBoard.setBoardFEN("k8/8/2Q5/8/8/8/8/K7 b KQkq - 0 0");
+	//activeBoard.setBoardFEN("k8/8/2Q5/8/8/8/8/K7 b KQkq - 0 0");
+	//activeBoard.setBoardFEN("8/p3P2p/1p3k2/2p5/8/P3R3/3q1PB1/4R1K1 b KQkq - 0 0");
+
 	activeBoard.currentTurnInformationPackage = { {-1, -1}, {-1, -1, -1, -1} };
 
-	activeBoard.whitePlayer = new Player;
-	activeBoard.blackPlayer = new Player;
+	activeBoard.whitePlayer = new Computer(3, 4);
+	activeBoard.blackPlayer = new Computer(4, 3);
 
 	return true;
 }
 bool GameEngine::OnUserUpdate(float elapsedTime)
 {
-	if (checkForStalemate(activeBoard, activeBoard.whiteToMove))
-		activeBoard.checkmate = 's';
+	
 
 	if (activeBoard.checkmate)
 	{
-		
+		std::cout << activeBoard.checkmate;
 	}
 	else
 	{
+		if (checkForStalemate(activeBoard, activeBoard.whiteToMove))
+			activeBoard.checkmate = 's';
+
 		(activeBoard.whiteToMove ? activeBoard.whitePlayer : activeBoard.blackPlayer)->MakeAMove(activeBoard, activeBoard.currentTurnInformationPackage, this);
 
 		int selectedPieceX = activeBoard.currentTurnInformationPackage.selectedPiece.first;
@@ -41,6 +45,8 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				activeBoard.fiftyMoveRuleCounter = 0;
 
 			makeMove(activeBoard, playedMove);
+
+			activeBoard.history.push_back(boardIntoString(activeBoard));
 		}
 
 		drawBoard();

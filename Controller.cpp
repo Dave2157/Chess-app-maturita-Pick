@@ -105,9 +105,15 @@ void Player::MakeAMove(const Board& board, ControllerTurnInformationPackage& rec
 	return;
 }
 
+Computer::Computer(int md, int nob) : Controller()
+{
+	minimaxDepth = md;
+	numberOfBranches = nob;
+}
+
 void Computer::MakeAMove(const Board& board, ControllerTurnInformationPackage& receivedPackage, GameEngine* ge)
 {
-	Move moveToBePlayed = Minimax(board, MINIMAX_DEPTH, MINIMAX_BRANCHES, board.whiteToMove).move;
+	Move moveToBePlayed = Minimax(board, minimaxDepth, numberOfBranches, board.whiteToMove).move;
 
 	receivedPackage.selectedPiece = std::make_pair(moveToBePlayed.startX, moveToBePlayed.startY);
 	receivedPackage.playedMove = moveToBePlayed;

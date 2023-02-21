@@ -36,6 +36,8 @@ struct Board
 	int fiftyMoveRuleCounter;
 	int fullMoves;
 	char checkmate;
+	vector<string> history;
+
 
 
 	Controller* whitePlayer;

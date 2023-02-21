@@ -15,5 +15,10 @@ class Player : public Controller
 
 class Computer : public Controller
 {
+	int minimaxDepth;
+	int numberOfBranches;
+
+public:
+	Computer(int md, int nob);
 	virtual void MakeAMove(const Board& board, ControllerTurnInformationPackage& receivedPackage, GameEngine* ge);
 };

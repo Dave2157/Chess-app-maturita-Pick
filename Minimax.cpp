@@ -13,7 +13,9 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 	for (pair<int, int> pieceLoc : piecesLocations)
 	{
 		char pieceType = board.layout[pieceLoc.second][pieceLoc.first];
-		auto legalMovesForThisPiece = findLegalMovesForAPiece(board, pieceType, pieceLoc.first, pieceLoc.second);
+		Board newBoard(board);
+		newBoard.whiteToMove = whitesTurn;
+		auto legalMovesForThisPiece = findLegalMovesForAPiece(newBoard, pieceType, pieceLoc.first, pieceLoc.second);
 
 		for (auto move : legalMovesForThisPiece)
 		{
@@ -97,7 +99,7 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 
 			int score;
 
-			score = Minimax(newBoard, 0, MINIMAX_BRANCHES, !whitesTurn).score;
+			score = Minimax(newBoard, 0, numberOfBranches, !whitesTurn).score;
 
 			move.promotion = promotionState;
 			movesWithEvaluations.push_back({ move, score });
@@ -384,7 +386,7 @@ int evaluateQueen(const Board& board, int x, int y, bool isWhite)
 		{
 			if (!boundsOk(i * offset.first + x, i * offset.second + y) || (isWhite ? isupper : islower)(board.layout[i * offset.second + y][i * offset.first + x]))
 				break;
-			squareControlScore += 5;
+			squareControlScore += 3;
 			if ((isWhite ? islower : isupper)(board.layout[i * offset.second + y][i * offset.first + x]))
 				break;
 		}

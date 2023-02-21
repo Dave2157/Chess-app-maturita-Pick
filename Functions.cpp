@@ -1001,7 +1001,16 @@ bool checkForStalemate(const Board& board, bool whiteToMove)
 	}
 
 	stalemate = !allLegalMoves.size();
+	
+	int howManyTimesDidThisPositionRepeat = 0;
+	if (board.history.size() >= 6)
+	{
+		string lastPosition = board.history.back();
+		howManyTimesDidThisPositionRepeat = std::count(board.history.begin(), board.history.end(), lastPosition);
+	}
 
+	if (howManyTimesDidThisPositionRepeat >= 3)
+		return true;
 	if (blackMinorPiecesCount <= 2 && whiteMinorPiecesCount <= 2 && !majorPieceOrAPawnIsPresent)
 		return true;
 	if (board.fiftyMoveRuleCounter == 100)
@@ -1010,4 +1019,13 @@ bool checkForStalemate(const Board& board, bool whiteToMove)
 		return true;
 
 	return false;
+}
+
+string boardIntoString(const Board& board)
+{
+	string ret(64, '\0');
+	for (int y = 0; y < 8; y++)
+		for (int x = 0; x < 8; x++)
+			ret[y * 8 + x] = board.layout[y][x];
+	return ret;
 }
