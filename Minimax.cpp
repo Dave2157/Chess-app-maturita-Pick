@@ -4,7 +4,7 @@
 #include "Minimax.h"
 #include "Logs.h"
 
-MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBranches, bool whitesTurn)
+MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBranches, bool whitesTurn, int alpha, int beta)
 {
 	std::vector<pair<int, int>> piecesLocations = findAllPieces(board, whitesTurn);
 
@@ -79,6 +79,7 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 					return a.score > b.score;
 				return a.score < b.score;
 			});
+
 		return movesWithEvaluations[0];
 	}
 	else
@@ -91,7 +92,7 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 			makeMove(newBoard, move);
 
 			if (checkForCheckmate(newBoard, true))
-				return { move, -INT_MAX };
+				return { move, INT_MIN };
 			if (checkForCheckmate(newBoard, false))
 				return { move, INT_MAX };
 			if (checkForStalemate(newBoard, !whitesTurn))
@@ -99,7 +100,7 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 
 			int score;
 
-			score = Minimax(newBoard, 0, numberOfBranches, !whitesTurn).score;
+			score = Minimax(newBoard, 0, numberOfBranches, !whitesTurn, INT_MIN, INT_MAX).score;
 
 			move.promotion = promotionState;
 			movesWithEvaluations.push_back({ move, score });
@@ -116,22 +117,36 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 	
 
 	vector<MinimaxPackage> movesToExamineFurther;
-
-	for (int i = 0; i < numberOfBranches && i < movesWithEvaluations.size(); i++)
-		movesToExamineFurther.push_back(movesWithEvaluations[i]);
-
+		
 	for (int i = 0; i < numberOfBranches && i < movesWithEvaluations.size(); i++)
 	{
+		if (alpha >= beta)
+			break;
+
+		movesToExamineFurther.push_back(movesWithEvaluations[i]);
+
 		Board newBoard(board);
 		char promotionState = movesToExamineFurther[i].move.promotion;
 		makeMove(newBoard, movesToExamineFurther[i].move);
 		
 		movesToExamineFurther[i].move.promotion = promotionState;
 
-		logAMoveWtihEvaluationsOfBothPositionsIntoAFile(board, movesToExamineFurther[i].move, "Logs.txt");						//=============================================================================== LOG
+		//logAMoveWtihEvaluationsOfBothPositionsIntoAFile(board, movesToExamineFurther[i].move, "Logs.txt");						//=============================================================================== LOG
 		movesToExamineFurther[i].move.promotion = promotionState;
+		
 
-		movesToExamineFurther[i].score = Minimax(newBoard, depthInHalfTurns - 1, numberOfBranches, !whitesTurn).score;
+		if (whitesTurn)
+		{
+			movesToExamineFurther[i].score = Minimax(newBoard, depthInHalfTurns - 1, numberOfBranches, !whitesTurn, alpha, INT_MAX).score;
+			if (movesToExamineFurther[i].score > alpha)
+				alpha = movesToExamineFurther[i].score;
+		}
+		else
+		{
+			movesToExamineFurther[i].score = Minimax(newBoard, depthInHalfTurns - 1, numberOfBranches, !whitesTurn, INT_MIN, beta).score;
+			if (movesToExamineFurther[i].score < beta)
+				beta = movesToExamineFurther[i].score;
+		}
 	}
 
 	std::sort(movesToExamineFurther.begin(), movesToExamineFurther.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)

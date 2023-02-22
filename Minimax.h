@@ -6,7 +6,7 @@ struct MinimaxPackage
 	int score;
 };
 
-MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBranches, bool whitesTurn);
+MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBranches, bool whitesTurn, int alpha, int beta);
 
 int evaluatePosition(const Board& board);
 

@@ -5,15 +5,16 @@
 bool GameEngine::OnUserCreate()
 {
 	//activeBoard.setBoardFEN("7K/1r6/r7/8/8/8/8/7k w KQkq - 0 0");
-	//activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
+	activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
 	//activeBoard.setBoardFEN("7k/8/1P6/6q1/8/8/PPP5/1KR5 w KQkq - 0 0");
 	//activeBoard.setBoardFEN("k8/8/2Q5/8/8/8/8/K7 b KQkq - 0 0");
-	//activeBoard.setBoardFEN("8/p3P2p/1p3k2/2p5/8/P3R3/3q1PB1/4R1K1 b KQkq - 0 0");
+	//activeBoard.setBoardFEN("P7/p3P2p/1p3k2/2p5/8/P3R3/3q1PB1/4R1K1 w KQkq - 0 0");
+	//activeBoard.setBoardFEN("rnb1kbnr/pppp1ppp/5q2/6B1/4P3/2N2NP1/PPP2P1P/R2QKB1R b KQkq - 0 0");
 
 	activeBoard.currentTurnInformationPackage = { {-1, -1}, {-1, -1, -1, -1} };
 
-	activeBoard.whitePlayer = new Computer(3, 4);
-	activeBoard.blackPlayer = new Computer(4, 3);
+	activeBoard.whitePlayer = new Player;
+	activeBoard.blackPlayer = new Computer(4, 6);
 
 	return true;
 }
@@ -37,7 +38,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 
 		Move playedMove = activeBoard.currentTurnInformationPackage.playedMove;
 
-		if (playedMove.targetX != -1)
+		if (playedMove.targetX != -1 && !(playedMove.promotion == 'w' || playedMove.promotion == 's'))
 		{
 			if (!(activeBoard.layout[playedMove.targetY][playedMove.targetX] != ' ' || activeBoard.layout[playedMove.startY][playedMove.startX] == 'P' || activeBoard.layout[playedMove.startY][playedMove.startX] == 'p'))
 				activeBoard.fiftyMoveRuleCounter++;
@@ -45,7 +46,6 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				activeBoard.fiftyMoveRuleCounter = 0;
 
 			makeMove(activeBoard, playedMove);
-
 			activeBoard.history.push_back(boardIntoString(activeBoard));
 		}
 

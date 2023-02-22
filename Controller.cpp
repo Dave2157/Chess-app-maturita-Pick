@@ -113,7 +113,7 @@ Computer::Computer(int md, int nob) : Controller()
 
 void Computer::MakeAMove(const Board& board, ControllerTurnInformationPackage& receivedPackage, GameEngine* ge)
 {
-	Move moveToBePlayed = Minimax(board, minimaxDepth, numberOfBranches, board.whiteToMove).move;
+	Move moveToBePlayed = Minimax(board, minimaxDepth, numberOfBranches, board.whiteToMove, INT_MIN, INT_MAX).move;
 
 	receivedPackage.selectedPiece = std::make_pair(moveToBePlayed.startX, moveToBePlayed.startY);
 	receivedPackage.playedMove = moveToBePlayed;
