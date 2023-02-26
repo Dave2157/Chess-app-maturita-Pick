@@ -91,16 +91,19 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 			char promotionState = move.promotion;
 			makeMove(newBoard, move);
 
-			if (checkForCheckmate(newBoard, true))
-				return { move, INT_MIN };
-			if (checkForCheckmate(newBoard, false))
-				return { move, INT_MAX };
-			if (checkForStalemate(newBoard, !whitesTurn))
-				return { move, 0 };
+			if (checkForCheckmate(newBoard, !whitesTurn))
+				return { move, whitesTurn ? INT_MAX : INT_MIN };
 
 			int score;
 
-			score = Minimax(newBoard, 0, numberOfBranches, !whitesTurn, INT_MIN, INT_MAX).score;
+			if (checkForStalemate(newBoard, !whitesTurn))
+				score = 0;
+			else
+				score = Minimax(newBoard, 0, numberOfBranches, !whitesTurn, INT_MIN, INT_MAX).score;
+
+			
+
+			
 
 			move.promotion = promotionState;
 			movesWithEvaluations.push_back({ move, score });
@@ -128,11 +131,17 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 		Board newBoard(board);
 		char promotionState = movesToExamineFurther[i].move.promotion;
 		makeMove(newBoard, movesToExamineFurther[i].move);
-		
 		movesToExamineFurther[i].move.promotion = promotionState;
+		
+		if (checkForStalemate(newBoard, !whitesTurn))
+		{
+			movesToExamineFurther[i].score = 0;
+			break;
+		}
+			
+
 
 		//logAMoveWtihEvaluationsOfBothPositionsIntoAFile(board, movesToExamineFurther[i].move, "Logs.txt");						//=============================================================================== LOG
-		movesToExamineFurther[i].move.promotion = promotionState;
 		
 
 		if (whitesTurn)

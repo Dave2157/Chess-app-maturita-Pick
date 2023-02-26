@@ -59,8 +59,8 @@ Board::~Board()
 	{
 		delete[] layout[i];
 	}
-	delete[] layout;
-	delete[] castlingRights;*/
+	delete[] layout;*/
+	delete[] castlingRights;
 }
 void Board::setBoardFEN(string FEN)				//		rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 {											//		boardLayout toMove castlingRights enPassentSquare halfMove fullMove
