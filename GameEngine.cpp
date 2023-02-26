@@ -17,8 +17,12 @@ bool GameEngine::OnUserCreate()
 	activeBoard.whitePlayer = new Player;
 	activeBoard.blackPlayer = new Computer(4, 5);
 
-
-	savedGame = true;
+	std::ifstream save("Save.txt");
+	if (save.peek() != std::ifstream::traits_type::eof())
+		savedGame = true;
+	else
+		savedGame = false;
+	
 	playing = false;
 	menuState = 0;
 	p1set = 0;
@@ -34,7 +38,23 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 	{
 		if (activeBoard.checkmate)
 		{
-			std::cout << activeBoard.checkmate;
+			FillRect(ScreenWidth() / 4, ScreenHeight() / 4, ScreenWidth() / 2, ScreenHeight() / 4, GREY);
+
+			switch (activeBoard.checkmate)
+			{
+			case 'b':
+				drawString("WHITE WINS", 8, ScreenWidth() / 4 + 8, ScreenHeight() / 4 + 8, BLACK);
+				break;
+			case 'w':
+				drawString("BLACK WINS", 8, ScreenWidth() / 4 + 8, ScreenHeight() / 4 + 8, BLACK);
+				break;
+			case 's':
+				drawString("STALEMATE", 8, ScreenWidth() / 4 + 8, ScreenHeight() / 4 + 8, BLACK);
+				break;
+			}
+
+			if (makeButton(ScreenWidth() / 3, 2 * ScreenHeight() / 3, "CONTINUE", ScreenWidth() / 3, ScreenHeight() / 4, 8, BLACK, WHITE, GREY, VERY_DARK_GREY, 0))
+				playing = false;
 		}
 		else
 		{
@@ -54,13 +74,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 
 			if (playedMove.targetX != -1 && !(playedMove.promotion == 'w' || playedMove.promotion == 's'))
 			{
-				if (!(activeBoard.layout[playedMove.targetY][playedMove.targetX] != ' ' || activeBoard.layout[playedMove.startY][playedMove.startX] == 'P' || activeBoard.layout[playedMove.startY][playedMove.startX] == 'p'))
-					activeBoard.fiftyMoveRuleCounter++;
-				else
-					activeBoard.fiftyMoveRuleCounter = 0;
-
 				makeMove(activeBoard, playedMove);
-				activeBoard.history.push_back(boardIntoString(activeBoard));
 			}
 
 			drawBoard();
@@ -136,13 +150,13 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				activeBoard.whiteToMove = !activeBoard.whiteToMove;
 			}
 
-
-
-
 			if (checkForCheckmate(activeBoard, true))
 				activeBoard.checkmate = 'w';
 			else if (checkForCheckmate(activeBoard, false))
 				activeBoard.checkmate = 'b';
+
+			saveGameIntoFile(activeBoard, "Save.txt");
+			
 		}
 
 	}
@@ -195,7 +209,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				{
 					if (!activeBoard.whitePlayer)
 						delete activeBoard.whitePlayer;
-					activeBoard.whitePlayer = new Computer(4, 5);
+					activeBoard.whitePlayer = new Computer(MINIMAX_DEPTH, MINIMAX_BRANCHES);
 
 					p1set = 'c';
 				}
@@ -206,7 +220,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				{
 					if (!activeBoard.whitePlayer)
 						delete activeBoard.whitePlayer;
-					activeBoard.whitePlayer = new Computer(4, 5);
+					activeBoard.whitePlayer = new Computer(MINIMAX_DEPTH, MINIMAX_BRANCHES);
 
 					p1set = 'c';
 				}
@@ -242,7 +256,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				{
 					if (!activeBoard.blackPlayer)
 						delete activeBoard.blackPlayer;
-					activeBoard.blackPlayer = new Computer(4, 5);
+					activeBoard.blackPlayer = new Computer(MINIMAX_DEPTH, MINIMAX_BRANCHES);
 
 					p2set = 'c';
 				}
@@ -253,7 +267,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				{
 					if (!activeBoard.blackPlayer)
 						delete activeBoard.blackPlayer;
-					activeBoard.blackPlayer = new Computer(4, 5);
+					activeBoard.blackPlayer = new Computer(MINIMAX_DEPTH, MINIMAX_BRANCHES);
 
 					p2set = 'c';
 				}
@@ -264,6 +278,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 			if (makeButton(ScreenWidth() / 2 - 24, 3 * ScreenHeight() / 4, "PLAY", 48, 16, 8, BLACK, WHITE, GREY, VERY_DARK_GREY, 1) && p1set && p2set)
 			{
 				activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
+
 				drawBoard();
 				playing = true;
 			}
@@ -273,6 +288,36 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 		case 2:
 		{
 			return false;
+		}
+		case 3:
+		{
+			std::ifstream save("Save.txt");
+
+			string FEN;
+			getline(save, FEN);
+			activeBoard.setBoardFEN(FEN);
+
+			string controllers;
+			getline(save, controllers);
+			if (controllers[0] == 'p')
+				activeBoard.whitePlayer = new Player();
+			else
+				activeBoard.whitePlayer = new Computer(MINIMAX_DEPTH, MINIMAX_BRANCHES);
+			if (controllers[1] == 'p')
+				activeBoard.blackPlayer = new Player();
+			else
+				activeBoard.blackPlayer= new Computer(MINIMAX_DEPTH, MINIMAX_BRANCHES);
+			
+			string position;
+			while (std::getline(save, position, '/'))
+			{
+				activeBoard.history.push_back(position);
+			}
+
+			drawBoard();
+			playing = true;
+
+			break;
 		}
 		}
 	}

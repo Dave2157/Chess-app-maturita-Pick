@@ -70,5 +70,8 @@
     <Text Include="Logs.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="Save.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

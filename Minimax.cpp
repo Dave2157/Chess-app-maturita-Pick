@@ -112,6 +112,10 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 		}
 		std::sort(movesWithEvaluations.begin(), movesWithEvaluations.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)
 			{
+				int difference = abs(a.score - b.score);
+				if (difference <= 10)
+					return randomBool();
+
 				if (whitesTurn)
 					return a.score > b.score;
 				return a.score < b.score;
@@ -160,6 +164,10 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 
 	std::sort(movesToExamineFurther.begin(), movesToExamineFurther.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)
 		{
+			int difference = abs(a.score - b.score);
+			if (difference <= 10)
+				return randomBool();
+
 			if (whitesTurn)
 				return a.score > b.score;
 			return a.score < b.score;

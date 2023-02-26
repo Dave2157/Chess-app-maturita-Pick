@@ -2,6 +2,9 @@
 #include "BoardAndUtils.h"
 #include "GameEngine.h"
 
+const int MINIMAX_DEPTH = 4;
+const int MINIMAX_BRANCHES = 5;
+
 class Controller
 {
 public:

@@ -842,6 +842,11 @@ std::vector<pair<int, int>> findAllPieces(const Board& board, bool white)
 
 void makeMove(Board& board, Move& move)
 {
+	if (!(board.layout[move.targetY][move.targetX] != ' ' || board.layout[move.startY][move.startX] == 'P' || board.layout[move.startY][move.startX] == 'p'))
+		board.fiftyMoveRuleCounter++;
+	else
+		board.fiftyMoveRuleCounter = 0;
+
 	if (move.pawnTwoTileMove)
 	{
 		int enPassentRank = board.whiteToMove ? 5 : 2;
@@ -908,6 +913,8 @@ void makeMove(Board& board, Move& move)
 
 	}
 
+	
+
 	board.layout[move.targetY][move.targetX] = board.layout[move.startY][move.startX];
 	board.layout[move.startY][move.startX] = ' ';
 
@@ -916,6 +923,9 @@ void makeMove(Board& board, Move& move)
 		board.layout[move.targetY][move.targetX] = move.promotion;
 		move.promotion = 0;
 	}
+
+	board.history.push_back(boardIntoString(board));
+
 }
 
 std::vector<pair<int, int>> findPiecesOfAGivenType(const Board& board, char piece)
@@ -1028,4 +1038,100 @@ string boardIntoString(const Board& board)
 		for (int x = 0; x < 8; x++)
 			ret[y * 8 + x] = board.layout[y][x];
 	return ret;
+}
+
+string boardIntoFEN(const Board& board)
+{
+	//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+	std::stringstream FEN;
+
+	int blankSpacesInARow = 0;
+
+	for (int y = 0; y < 8; y++)
+	{
+		for (int x = 0; x < 8; x++)
+		{
+			if (board.layout[y][x] != ' ')
+			{
+				if (blankSpacesInARow)
+				{
+					FEN << blankSpacesInARow;
+					blankSpacesInARow = 0;
+				}
+				FEN << board.layout[y][x];
+			}
+			else
+				blankSpacesInARow++;
+				
+		}
+		if (blankSpacesInARow)
+		{
+			FEN << blankSpacesInARow;
+			blankSpacesInARow = 0;
+		}
+		if (y == 7)
+			break;
+		FEN << '/';
+	}
+	FEN << ' ';
+
+	FEN << (board.whiteToMove ? 'w' : 'b');
+
+	FEN << ' ';
+
+	if (!(board.castlingRights[0] || board.castlingRights[1] || board.castlingRights[2] || board.castlingRights[3]))
+		FEN << '-';
+	if (board.castlingRights[0])
+		FEN << 'K';
+	if (board.castlingRights[1])
+		FEN << 'Q';
+	if (board.castlingRights[2])
+		FEN << 'k';
+	if (board.castlingRights[3])
+		FEN << 'q';
+
+	FEN << ' ';
+
+	if (board.enPassentSquare.first != -1)
+	{
+		FEN << char(board.enPassentSquare.first + 97);
+		FEN << 8 - board.enPassentSquare.second;
+	}
+	else
+		FEN << '-';
+
+	FEN << ' ';
+
+	FEN << board.fiftyMoveRuleCounter << ' ' << board.fullMoves;
+
+	return FEN.str();
+}
+
+void saveGameIntoFile(const Board& board, string fileName)
+{
+	std::ofstream file(fileName);
+	file << boardIntoFEN(board) << std::endl;
+
+	if (dynamic_cast<Player*>(board.whitePlayer))
+		file << 'p';
+	else
+		file << 'c';
+	if (dynamic_cast<Player*>(board.blackPlayer))
+		file << 'p';
+	else
+		file << 'c';
+
+	file << std::endl;
+
+	for (const string& position : board.history)
+	{
+		file << position << '/';
+	}
+}
+
+bool randomBool()
+{
+	std::time_t integer = time(nullptr);
+	return integer & 1;
 }

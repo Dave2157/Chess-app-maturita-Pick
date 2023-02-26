@@ -6,8 +6,6 @@
 #include "olcPixelGameEngine.h"
 #include "GameEngine.h"
 #include <ctime>
-#include <cstdlib>
-
 #include "Logs.h"
 #include "Minimax.h"
 #include <iostream>
@@ -20,11 +18,11 @@ using namespace olc;
 
 int main()
 {
-    std::srand(std::time(0));
+
     GameEngine engine;
     if (engine.Construct(128, 128, 4, 4))
         engine.Start();
-
+    
     //logASinglePositionEvaluationIntoAFile("r6K/1r6/8/8/8/8/8/7k w KQkq - 0 0", "Logs.txt");
 
     /*Board b;
