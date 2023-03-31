@@ -1042,7 +1042,7 @@ string boardIntoString(const Board& board)
 
 string boardIntoFEN(const Board& board)
 {
-	//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+	//rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1				priklad finalniho stringu
 
 	std::stringstream FEN;
 
@@ -1132,6 +1132,5 @@ void saveGameIntoFile(const Board& board, string fileName)
 
 bool randomBool()
 {
-	std::time_t integer = time(nullptr);
-	return integer & 1;
+	return time(nullptr) & 1;						//nápad na rychlou šanci 50 % z webu stackoverflow.com
 }

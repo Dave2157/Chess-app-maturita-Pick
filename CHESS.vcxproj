@@ -168,7 +168,6 @@
   <ItemGroup>
     <Text Include="Logs.txt" />
     <Text Include="Save.txt" />
-    <Text Include="Sources.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

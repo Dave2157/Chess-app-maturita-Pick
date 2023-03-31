@@ -17,7 +17,7 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 		newBoard.whiteToMove = whitesTurn;
 		auto legalMovesForThisPiece = findLegalMovesForAPiece(newBoard, pieceType, pieceLoc.first, pieceLoc.second);
 
-		for (auto move : legalMovesForThisPiece)
+		for (auto move : legalMovesForThisPiece)		// hodnoty promotion 'w' a 's' slouzi pouze pro vyvolani menu zvoleni promotion figurky pro hrace, pocitac to rovnou prevede na vsechny 4 potencialny outcomy
 		{
 			if (!move.promotion)
 				continue;
@@ -51,7 +51,7 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 			[](Move& m)
 			{
 				return m.promotion == 'w' || m.promotion == 's';
-			});
+			});			// po pridani vsech 4 moznych konecnych hodnot promotion se tyhle puvodni musi odstranit 
 		allLegalMoves.erase(garbageStart, allLegalMoves.end());
 	}
 
@@ -75,6 +75,14 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 		}
 		std::sort(movesWithEvaluations.begin(), movesWithEvaluations.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)
 			{
+				if (TWO_OPPOSING_COMPUTERS)
+				{
+					int difference = abs(a.score - b.score);			// timto zabranime tomu, aby dva pocitace hrajici proti sobe neopakovali jednu a tu samou hru
+					if (difference <= DIFFERENCE_OF_EQUALLY_GOOD_MOVES)
+						return randomBool();
+				}
+				
+
 				if (whitesTurn)
 					return a.score > b.score;
 				return a.score < b.score;
@@ -84,37 +92,32 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 	}
 	else
 	{
-
 		for (Move move : allLegalMoves)
 		{
 			Board newBoard(board);
-			char promotionState = move.promotion;
+			char promotionState = move.promotion;		// je potreba uchovat v promenne, protoze funkce makeMove prepise move.promotion, coz se nam v tomto pripade nehodi
 			makeMove(newBoard, move);
 
 			if (checkForCheckmate(newBoard, !whitesTurn))
-				return { move, whitesTurn ? INT_MAX : INT_MIN };
+				return { move, whitesTurn ? INT_MAX : INT_MIN };		//pokud je sachmat, neda se prohledavat dal, return je hned
 
 			int score;
-
-			if (checkForStalemate(newBoard, !whitesTurn))
+			if (checkForStalemate(newBoard, !whitesTurn))	
 				score = 0;
 			else
-				score = Minimax(newBoard, 0, numberOfBranches, !whitesTurn, INT_MIN, INT_MAX).score;
-
-			
-
-			
+				score = Minimax(newBoard, 0, numberOfBranches, !whitesTurn, INT_MIN, INT_MAX).score;			// v ramci lepsi evaluace tahu se prohleda u kazdeho tahu jedna vrstva navic (samotny stromovy minimax zacina az nize)
 
 			move.promotion = promotionState;
 			movesWithEvaluations.push_back({ move, score });
-
-			
 		}
 		std::sort(movesWithEvaluations.begin(), movesWithEvaluations.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)
 			{
-				int difference = abs(a.score - b.score);
-				if (difference <= 10)
-					return randomBool();
+				if (TWO_OPPOSING_COMPUTERS)
+				{
+					int difference = abs(a.score - b.score);			// timto zabranime tomu, aby dva pocitace hrajici proti sobe neopakovali jednu a tu samou hru
+					if (difference <= DIFFERENCE_OF_EQUALLY_GOOD_MOVES)
+						return randomBool();
+				}
 
 				if (whitesTurn)
 					return a.score > b.score;
@@ -140,13 +143,12 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 		if (checkForStalemate(newBoard, !whitesTurn))
 		{
 			movesToExamineFurther[i].score = 0;
-			break;
+			continue;
 		}
 			
 
 
-		//logAMoveWtihEvaluationsOfBothPositionsIntoAFile(board, movesToExamineFurther[i].move, "Logs.txt");						//=============================================================================== LOG
-		
+		//logAMoveWtihEvaluationsOfBothPositionsIntoAFile(board, movesToExamineFurther[i].move, "Logs.txt");					//misto na zavolani log funkce
 
 		if (whitesTurn)
 		{
@@ -164,9 +166,12 @@ MinimaxPackage Minimax(const Board& board, int depthInHalfTurns, int numberOfBra
 
 	std::sort(movesToExamineFurther.begin(), movesToExamineFurther.end(), [&whitesTurn](const MinimaxPackage& a, const MinimaxPackage& b)
 		{
-			int difference = abs(a.score - b.score);
-			if (difference <= 10)
-				return randomBool();
+			if (TWO_OPPOSING_COMPUTERS)
+			{
+				int difference = abs(a.score - b.score);			// timto zabranime tomu, aby dva pocitace hrajici proti sobe neopakovali jednu a tu samou hru
+				if (difference <= DIFFERENCE_OF_EQUALLY_GOOD_MOVES)
+					return randomBool();
+			}
 
 			if (whitesTurn)
 				return a.score > b.score;
@@ -255,23 +260,6 @@ int evaluatePawn(const Board& board, int x, int y, bool isWhite)
 			centerControlScore += 30;
 	}
 	score += centerControlScore;
-
-	/*int connectedPawnsScore = 0;
-	if (isWhite)
-	{
-		for (int i = -1; i < 2; i += 2)
-			for (int j = -1; j < 1; j += 2)
-				if (boundsOk(x + i, y + j) && board.layout[y + j][x + i] == 'P')
-					connectedPawnsScore += 10;
-	}
-	else
-	{
-		for (int i = -1; i < 2; i += 2)
-			for (int j = -1; j < 1; j += 2)
-				if (boundsOk(x + i, y + j) && board.layout[y + j][x + i] == 'p')
-					connectedPawnsScore += 10;
-	}
-	score += connectedPawnsScore;*/
 
 	int isolatedPawnScore = 0;
 	int passedPawnScore = 0;
@@ -424,21 +412,6 @@ int evaluateQueen(const Board& board, int x, int y, bool isWhite)
 		}
 	}
 	score += squareControlScore;
-
-	/*int escapeSquareScore = 0;
-	bool escapeSquares = false;
-	auto queenMoves = findLegalMovesForAPiece(board, (isWhite ? 'Q' : 'q'), x, y);
-	for (auto& move : queenMoves)
-	{
-		if (!isSquareUnderAttack(board, move.targetX, move.targetY, !isWhite))
-		{
-			escapeSquares = true;
-			break;
-		}
-	}
-	if (!escapeSquares)
-		escapeSquareScore -= 200;
-	score += escapeSquareScore;*/
 
 	return score;
 }

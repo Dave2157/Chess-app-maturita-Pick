@@ -3,7 +3,7 @@
 #include "Functions.h"
 #include <fstream>
 
-bool GameEngine::OnUserCreate()
+bool GameEngine::OnUserCreate()				//spusti se pri startu aplikace
 {
 	//activeBoard.setBoardFEN("7K/1r6/r7/8/8/8/8/7k w KQkq - 0 0");
 	activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
@@ -31,7 +31,7 @@ bool GameEngine::OnUserCreate()
 
 	return true;
 }
-bool GameEngine::OnUserUpdate(float elapsedTime)
+bool GameEngine::OnUserUpdate(float elapsedTime)		//spousti se kazdy frame
 {
 
 	if (playing)
@@ -97,7 +97,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 
 
 
-			if (isSquareUnderAttack(activeBoard, bKingX, bKingY, true))
+			if (isSquareUnderAttack(activeBoard, bKingX, bKingY, true))					// zvyrazneni krale v sachu
 			{
 				FillRect(bKingX * 16, bKingY * 16, 16, 1, RED);
 				FillRect(bKingX * 16 + 15, bKingY * 16 + 1, 1, 14, RED);
@@ -114,7 +114,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 			}
 
 
-			if (selectedPieceX != -1)
+			if (selectedPieceX != -1)			// udela cervenou tecku na polickach, kam muze figurka tahnout
 			{
 				std::vector<Move> availableMovesForSelectedPiece = findLegalMovesForAPiece(activeBoard, activeBoard.layout[selectedPieceY][selectedPieceX], selectedPieceX, selectedPieceY);
 
@@ -124,7 +124,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				}
 			}
 
-			if (activeBoard.currentTurnInformationPackage.playedMove.promotion == 'w' || activeBoard.currentTurnInformationPackage.playedMove.promotion == 's')
+			if (activeBoard.currentTurnInformationPackage.playedMove.promotion == 'w' || activeBoard.currentTurnInformationPackage.playedMove.promotion == 's')			// menu na vyber promotionu
 			{
 				int xInPixels = activeBoard.currentTurnInformationPackage.playedMove.targetX * 16 - 24;
 				int yInPixels = activeBoard.currentTurnInformationPackage.playedMove.targetY * 16;
@@ -165,7 +165,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 		Clear(Pixel(91, 56, 7));
 		switch (menuState)
 		{
-		case 0:
+		case 0:									// MAIN MENU
 		{
 			drawString("CHESS", 16, ScreenWidth() / 2 - 20, ScreenHeight() / 4, WHITE);
 			makeButton(10, ScreenHeight() / 2, "PLAY", 32, 16, 8, BLACK, WHITE, GREY, VERY_DARK_GREY, 1);
@@ -174,7 +174,7 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 				makeButton(50, ScreenHeight() / 2, "CONTINUE", 64, 16, 8, BLACK, WHITE, GREY, VERY_DARK_GREY, 3);
 			break;
 		}
-		case 1:
+		case 1:									// VYBER CONTROLLERU
 		{
 
 			if (p1set == 'p')
@@ -278,6 +278,8 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 			if (makeButton(ScreenWidth() / 2 - 24, 3 * ScreenHeight() / 4, "PLAY", 48, 16, 8, BLACK, WHITE, GREY, VERY_DARK_GREY, 1) && p1set && p2set)
 			{
 				activeBoard.setBoardFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0");
+				activeBoard.checkmate = 0;
+				activeBoard.history = {};
 
 				drawBoard();
 				playing = true;
@@ -285,11 +287,11 @@ bool GameEngine::OnUserUpdate(float elapsedTime)
 
 			break;
 		}
-		case 2:
+		case 2:						//	QUIT
 		{
 			return false;
 		}
-		case 3:
+		case 3:						// NACTENI ULOZENE HRY
 		{
 			std::ifstream save("Save.txt");
 

@@ -1,5 +1,9 @@
 #pragma once
 #include "BoardAndUtils.h"
+
+const int DIFFERENCE_OF_EQUALLY_GOOD_MOVES = 10;
+const bool TWO_OPPOSING_COMPUTERS = true;
+
 struct MinimaxPackage
 {
 	Move move;
@@ -15,6 +19,6 @@ int evaluateRook(const Board& board, int x, int y, bool isWhite);
 int evaluateKnight(const Board& board, int x, int y, bool isWhite);
 int evaluateBishop(const Board& board, int x, int y, bool isWhite);
 int evaluateQueen(const Board& board, int x, int y, bool isWhite);
-int evaluateKing(const Board& board, int x, int y, bool isWhite);
+int evaluateKing(const Board& board, int x, int y, bool isWhite);	
 int evaluatePawnStucture(const Board& board, bool white);
 int evaluateWeaknessesOnColoredSquares(const Board& board, bool lightSquares);
